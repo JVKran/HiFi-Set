@@ -5,6 +5,13 @@
 
 #include <Arduino.h>
 #include <Wire.h>
+#include "Input.hpp"
+#include "Array.hpp"
+
+class RadioStatsListener {
+	public:
+		virtual void newStatistics(const bool stereo, const uint8_t signalStrength) = 0;
+};
 
 /// \brief
 /// TEA5767 Interface
@@ -24,8 +31,16 @@
 ///		- Set/Get Software Programmable Ports
 ///		- More to be seen in tests
 /// 
-class TEA5767 {
+class TEA5767 : public InputListener {
 	private:
+		unsigned long long int updatePeriod;
+		unsigned long long int lastUpdate;
+		bool lastStereo;
+		uint8_t lastSignalStrength;
+
+		array<RadioStatsListener*, 5> listeners;
+		uint8_t amountOfListeners = 0;
+
 		TwoWire & bus;
 		uint8_t bandLimit;
 		uint8_t address;
@@ -40,7 +55,7 @@ class TEA5767 {
 		int testHiLo(const float frequency);
 		void setPLL(const float frequency, unsigned int hilo);
 	public:
-		TEA5767(TwoWire & bus, uint8_t bandLimit = 0, uint8_t address = 0x60, const bool autoBegin = false);
+		TEA5767(TwoWire & bus, unsigned long long int updatePeriod, uint8_t bandLimit = 0, uint8_t address = 0x60, const bool autoBegin = false);
 		void begin();
 
 		//Basic Settings
@@ -95,6 +110,29 @@ class TEA5767 {
 		bool getPort(const unsigned int port);
 
 		bool testCorrectFunctioning();
+
+		void addListener(RadioStatsListener * listenerToAdd){
+			listeners[amountOfListeners++] = listenerToAdd;
+		}
+
+		virtual void frequencySelected(const float frequency) override {
+			setFrequency(frequency);
+		}
+
+		void operator()(){
+			if(millis() - lastUpdate > updatePeriod){
+				lastUpdate = millis();
+				bool currentStereo = stereoReception();
+				uint8_t currentStrength = signalStrength();
+				if(lastStereo != currentStereo || lastSignalStrength != currentStrength) {
+					for(uint8_t i = 0; i < amountOfListeners; i++){
+						listeners[i]->newStatistics(currentStereo, currentStrength);
+					}
+					lastStereo = currentStereo;
+					lastSignalStrength = currentStrength;
+				}
+			}
+		}
 };
 
 #endif //__TEA5767_HPP

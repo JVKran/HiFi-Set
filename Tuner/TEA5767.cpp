@@ -8,7 +8,8 @@
 /// This constructor has one mandatory parameter; the I2C bus. The address defaults
 /// to 0x60. Leave the bandLimit empty or 0 for no bandlimits (EU/US) or 1 for use in
 /// Japan. The module is automatically muted after initialisation and madatory settings are set.
-TEA5767::TEA5767(TwoWire & bus, uint8_t bandLimit, uint8_t address, const bool autoBegin):
+TEA5767::TEA5767(TwoWire & bus, unsigned long long int updatePeriod, uint8_t bandLimit, uint8_t address, const bool autoBegin):
+	updatePeriod(updatePeriod),
 	bus(bus),
 	bandLimit(bandLimit),
 	address(address)
@@ -17,7 +18,7 @@ TEA5767::TEA5767(TwoWire & bus, uint8_t bandLimit, uint8_t address, const bool a
 		begin();
 	}
 	if(!testCorrectFunctioning()){
-		Serial.println("Check Wiring!");
+		Serial.println("Check TEA5767 Wiring!");
 	}
 }
 
