@@ -1,6 +1,6 @@
-#include "RDA5807.hpp"
+#include "TEA5767.hpp"
 
-RDA5807 radio = RDA5807(Wire);
+TEA5767 radio = TEA5767(Wire);
 
 void setup(){
 	Wire.begin();
@@ -10,10 +10,12 @@ void setup(){
 }
 
 void loop(){
-	if(radio.testCorrectFunctioning()){
-		Serial.println("Succesful");
-	} else {
-		Serial.println("Failed");
-	}
-	delay(1000);
+	Serial.print("Tuned Frequency: ");
+	Serial.print(radio.getFrequency());
+	Serial.print(", Signal Strength: ");
+	Serial.print(radio.signalStrength());
+	Serial.print(", Stereo: ");
+	Serial.print(radio.stereoReception());
+	Serial.println(radio.isStereo());
+	delay(5000);
 }
