@@ -26,6 +26,13 @@ void TEA5767::begin(){
 	setMute(true);
 	audioSettings();
 	setStereo(true);
+
+	bool currentStereo = stereoReception();
+	uint8_t currentStrength = signalStrength();
+
+	for(uint8_t i = 0; i < amountOfListeners; i++){
+		listeners[i]->newStatistics(currentStereo, 255);
+	}
 }
 
 /// \brief

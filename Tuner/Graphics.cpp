@@ -9,6 +9,7 @@ void Graphics::begin(){
 		Serial.println("Check SSD1306 Wiring!");
 	}
 	display.clearDisplay();
+	display.display();
 }
 
 void Graphics::displayFrequency(const float frequency){
@@ -23,27 +24,33 @@ void Graphics::displayFrequency(const float frequency){
 	lastFrequency = frequency;
 }
 
+void Graphics::displayStrength(const uint8_t & signalStrength, const uint8_t startX, const uint8_t startY){
+	for(uint8_t i = 0; i < lastStrength / 50; i++){
+		display.drawLine(startX + i * 2, startY, startX + i * 2, startY - i * 2, BLACK);
+	}
+	for(uint8_t i = 0; i < signalStrength / 50; i++){
+		display.drawLine(startX + i * 2, startY, startX + i * 2, startY - i * 2, WHITE);
+	}
+	display.display();
+}
+
 void Graphics::displayStatistics(const bool stereo, const uint8_t signalStrength){
 	display.setTextSize(1);
 	display.setTextColor(BLACK);
-	display.setCursor(0,0);
+	display.setCursor(102,2);
 	if(lastStereo){
 		display.print("ST");
 	} else {
-		display.print("  ");
+		display.print("MO");
 	}
-	display.setCursor(100,0);
-	display.println(lastStrength);
 	display.setTextColor(WHITE);
-	display.setCursor(0,0);
+	display.setCursor(102,2);
 	if(stereo){
 		display.print("ST");
 	} else {
-		display.print("  ");
+		display.print("MO");
 	}
-	display.setCursor(100,0);
-	display.println(signalStrength);
-	display.display();
+	displayStrength(signalStrength);
 	lastStrength = signalStrength;
 	lastStereo = stereo;
 }

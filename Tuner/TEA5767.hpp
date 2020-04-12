@@ -126,7 +126,7 @@ class TEA5767 : public InputListener {
 				uint8_t currentStrength = signalStrength();
 				if(lastStereo != currentStereo || lastSignalStrength != currentStrength) {
 					for(uint8_t i = 0; i < amountOfListeners; i++){
-						listeners[i]->newStatistics(currentStereo, currentStrength);
+						listeners[i]->newStatistics(currentStereo, 255);
 					}
 					lastStereo = currentStereo;
 					lastSignalStrength = currentStrength;
