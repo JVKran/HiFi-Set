@@ -1,9 +1,10 @@
 #include "Input.hpp"
 
-Input::Input(const uint8_t frequencyKnob):
-	frequencyKnob(frequencyKnob)
+Input::Input(const uint8_t dataOutPin, const uint8_t clockPin)
 {
-	pinMode(frequencyKnob, INPUT);
+	ESP32Encoder::useInternalWeakPullResistors = true;
+	encoder.clearCount();
+	encoder.attachHalfQuad(dataOutPin, clockPin);
 }
 
 void Input::addListener(InputListener * listenerToAdd){
@@ -11,19 +12,10 @@ void Input::addListener(InputListener * listenerToAdd){
 }
 
 void Input::operator()(){
-	if(millis() - lastMeasurement > 500){
-		uint16_t analogReading = analogRead(frequencyKnob);
-		if(analogReading != lastAnalogReading){
-			float frequency = float(float(analogReading * 0.021) + 87);
-			lastAnalogReading = analogReading;
-			frequency = ((float)((int)(frequency * 10))) / 10;
-			if(frequency != lastFrequency){
-				lastFrequency = frequency;
-				for(uint8_t i = 0; i < amountOfListeners; i++){
-					listeners[i]->frequencySelected(frequency);
-				}
-			}
+	if(lastPosition != encoder.getCount()){
+		lastPosition = encoder.getCount();
+		for(uint8_t i = 0; i < amountOfListeners; i++){
+			listeners[i]->frequencySelected(87 + (float(lastPosition) / 10));
 		}
-		lastMeasurement = millis();
 	}
 }

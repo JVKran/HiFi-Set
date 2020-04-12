@@ -10,7 +10,7 @@
 
 class Graphics : public InputListener, public RadioStatsListener {
 	private:
-		Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire, -1);
+		Adafruit_SSD1306 display;
 
 		void displayFrequency(const float frequency);
 		float lastFrequency = 0.0;
@@ -20,6 +20,7 @@ class Graphics : public InputListener, public RadioStatsListener {
 		uint8_t lastStrength = 0;
 
 	public:
+		Graphics(TwoWire & bus, const uint8_t width, const uint8_t height);
 		void begin();
 
 		virtual void frequencySelected(const float frequency) override {

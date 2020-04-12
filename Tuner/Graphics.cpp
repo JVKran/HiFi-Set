@@ -1,11 +1,14 @@
 #include "Graphics.hpp"
 
+Graphics::Graphics(TwoWire & bus, const uint8_t width, const uint8_t height):
+	display(Adafruit_SSD1306(width, height, &bus, -1))
+{}
+
 void Graphics::begin(){
 	if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
 		Serial.println("Check SSD1306 Wiring!");
 	}
 	display.clearDisplay();
-	//displayStatistics(true, 208);
 }
 
 void Graphics::displayFrequency(const float frequency){

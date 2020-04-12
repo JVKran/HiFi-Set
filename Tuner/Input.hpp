@@ -2,6 +2,7 @@
 #define __INPUT_HPP
 
 #include <Arduino.h>
+#include <ESP32Encoder.h>
 #include "Array.hpp"
 
 class InputListener {
@@ -11,15 +12,13 @@ class InputListener {
 
 class Input {
 	private:
-		const uint8_t frequencyKnob;
-		uint16_t lastAnalogReading;
-		float lastFrequency;
-		unsigned long long int lastMeasurement;
+		ESP32Encoder encoder;
+		int32_t lastPosition;
 
 		array<InputListener*, 5> listeners;
 		uint8_t amountOfListeners = 0;
 	public:
-		Input(const uint8_t frequencyKnob);
+		Input(const uint8_t dataOutPin, const uint8_t clockPin);
 
 		void addListener(InputListener * listenerToAdd);
 		void operator()();
