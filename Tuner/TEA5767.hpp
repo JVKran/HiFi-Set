@@ -33,8 +33,6 @@ class RadioStatsListener {
 /// 
 class TEA5767 : public InterfaceListener {
 	private:
-		unsigned long long int updatePeriod;
-		unsigned long long int lastUpdate;
 		bool lastStereo;
 		uint8_t lastSignalStrength;
 
@@ -55,7 +53,7 @@ class TEA5767 : public InterfaceListener {
 		int testHiLo(const float frequency);
 		void setPLL(const float frequency, unsigned int hilo);
 	public:
-		TEA5767(TwoWire & bus, unsigned long long int updatePeriod, uint8_t bandLimit = 0, uint8_t address = 0x60, const bool autoBegin = false);
+		TEA5767(TwoWire & bus, uint8_t bandLimit = 0, uint8_t address = 0x60, const bool autoBegin = false);
 		void begin();
 
 		//Basic Settings
@@ -116,22 +114,19 @@ class TEA5767 : public InterfaceListener {
 		}
 
 		virtual void frequencySelected(const float frequency) override {
+			// setMute(true);
 			setFrequency(frequency);
-		}
-
-		void operator()(){
-			if(millis() - lastUpdate > updatePeriod){
-				lastUpdate = millis();
-				bool currentStereo = stereoReception();
-				uint8_t currentStrength = signalStrength();
-				if(lastStereo != currentStereo || lastSignalStrength != currentStrength) {
-					for(uint8_t i = 0; i < amountOfListeners; i++){
-						listeners[i]->newStatistics(!currentStereo, 255);
-					}
-					lastStereo = currentStereo;
-					lastSignalStrength = currentStrength;
+			delay(200);
+			bool currentStereo = stereoReception();
+			uint8_t currentStrength = signalStrength();
+			if(lastStereo != currentStereo || lastSignalStrength != currentStrength) {
+				for(uint8_t i = 0; i < amountOfListeners; i++){
+					listeners[i]->newStatistics(!currentStereo, currentStrength);
 				}
+				lastStereo = currentStereo;
+				lastSignalStrength = currentStrength;
 			}
+			// setMute(false);
 		}
 };
 

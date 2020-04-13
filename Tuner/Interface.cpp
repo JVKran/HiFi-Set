@@ -59,6 +59,7 @@ void Interface::operator()(){
 			default: {
 				for(uint8_t i = 0; i < amountOfListeners; i++){
 					listeners[i]->frequencySelected(presets[encoder.getCount() % 8]);
+					listeners[i]->settingSelected(stations[encoder.getCount() % 8]);
 				}
 				break;
 			}

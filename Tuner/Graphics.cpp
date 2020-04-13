@@ -9,6 +9,7 @@ void Graphics::begin(){
 		Serial.println("Check SSD1306 Wiring!");
 	}
 	display.clearDisplay();
+	displayWifi(255);
 }
 
 void Graphics::displayTime(const String time){
@@ -35,6 +36,18 @@ void Graphics::displayFrequency(const float frequency){
 	lastFrequency = frequency;
 }
 
+void Graphics::displaySetting(const String & setting){
+	display.setTextSize(1);
+	display.setTextColor(BLACK);
+	display.setCursor(0,54);
+	display.print(lastSetting);
+	display.setTextColor(WHITE);
+	display.setCursor(0,54);
+	display.print(setting);
+	lastSetting = setting;
+	display.display();
+}
+
 void Graphics::displayStrength(const uint8_t & signalStrength, const uint8_t startX, const uint8_t startY){
 	for(uint8_t i = 0; i < lastStrength / 50; i++){
 		display.drawLine(startX + i * 2, startY, startX + i * 2, startY - i * 2, BLACK);
@@ -46,20 +59,20 @@ void Graphics::displayStrength(const uint8_t & signalStrength, const uint8_t sta
 }
 
 void Graphics::displayStatistics(const bool stereo, const uint8_t signalStrength){
-	display.setTextSize(1);
+	display.setTextSize(0);
 	display.setTextColor(BLACK);
-	display.setCursor(102,2);
+	display.setCursor(117,0);
 	if(lastStereo){
-		display.print("ST");
+		display.print(2);
 	} else {
-		display.print("MO");
+		display.print(1);
 	}
 	display.setTextColor(WHITE);
-	display.setCursor(102,2);
+	display.setCursor(117,0);
 	if(stereo){
-		display.print("ST");
+		display.print(2);
 	} else {
-		display.print("MO");
+		display.print(1);
 	}
 	displayStrength(signalStrength);
 	lastStrength = signalStrength;

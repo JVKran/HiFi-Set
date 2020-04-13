@@ -8,8 +8,7 @@
 /// This constructor has one mandatory parameter; the I2C bus. The address defaults
 /// to 0x60. Leave the bandLimit empty or 0 for no bandlimits (EU/US) or 1 for use in
 /// Japan. The module is automatically muted after initialisation and madatory settings are set.
-TEA5767::TEA5767(TwoWire & bus, unsigned long long int updatePeriod, uint8_t bandLimit, uint8_t address, const bool autoBegin):
-	updatePeriod(updatePeriod),
+TEA5767::TEA5767(TwoWire & bus, uint8_t bandLimit, uint8_t address, const bool autoBegin):
 	bus(bus),
 	bandLimit(bandLimit),
 	address(address)
@@ -23,7 +22,7 @@ TEA5767::TEA5767(TwoWire & bus, unsigned long long int updatePeriod, uint8_t ban
 }
 
 void TEA5767::begin(){
-	setMute(true);
+	//setMute(true);
 	audioSettings();
 	setStereo(true);
 
@@ -159,13 +158,13 @@ int TEA5767::testHiLo(const float frequency){
 /// to prevent loud pops and cracks.
 void TEA5767::setFrequency(const float frequency, const int hiLoForce){
 	if((((bandLimit && frequency <= 91) || (bandLimit && frequency >= 76) || ((!bandLimit && frequency <= 108) || (!bandLimit && frequency >= 87.5))) && frequency != -1)){
-		setMute(true);
+		// setMute(true);
 		if(hiLoForce == -1){
 			setPLL(frequency, testHiLo(frequency));
 		} else if(hiLoForce == 0 || hiLoForce == 1){
 			setPLL(frequency, hiLoForce);
 		}
-		setMute(false);
+		//setMute(false);
 	} else {
 		if(bandLimit){
 			setFrequency(76);

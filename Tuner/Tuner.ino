@@ -13,7 +13,7 @@ NTPClient timeClient(ntpUDP);
 const char* ssid     = "KraanBast2.4";
 const char* password = "Snip238!";
 
-TEA5767 radio = TEA5767(Wire, 5000);
+TEA5767 radio = TEA5767(Wire);
 Graphics display = Graphics(Wire, 128, 64);
 RotaryEncoder encoder = RotaryEncoder(36, 39, 32);
 Interface interface = Interface(encoder);
@@ -24,6 +24,8 @@ void buttonPressed(){
 }
 
 void connect(){
+	WiFi.mode(WIFI_STA);
+	WiFi.setHostname("Radio");
 	WiFi.begin(ssid, password);
 	while (WiFi.status() != WL_CONNECTED) {
 		delay(50);
@@ -35,6 +37,7 @@ void setup(){
 
 	connect();
 
+	Wire.setClock(400000);
 	Wire.begin();
 	Serial.begin(9600);
 	EEPROM.begin(2);
@@ -53,5 +56,6 @@ void setup(){
 void loop(){
 	timeKeeper();
 	interface();
-	radio();
+	// delay(100);
+	// Serial.println(WiFi.RSSI());
 }

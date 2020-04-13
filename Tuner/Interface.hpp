@@ -25,6 +25,7 @@ class Interface {
 		enum class states {FREE, PRESETS};
 		states state = states::PRESETS;
 		array<float, 8> presets { {92.6, 96.8, 98.9, 100.1, 100.7, 101.2, 102.7, 107.5} };
+		array<const char*, 8> stations { {"NPO R2", "NPO R3", "NPO R1", "BNR NIEUWS", "QMUSIC", "SKYRADIO", "RADIO538", "MIDLAND"} };
 	public:
 		Interface(RotaryEncoder & encoder);
 		void begin();

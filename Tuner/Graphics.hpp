@@ -29,15 +29,18 @@ class Graphics : public InterfaceListener, public RadioStatsListener, public Tim
 		states state = states::FREE;
 
 		String lastSetting;
-		void displaySetting(const String & setting){
-			display.setTextSize(1);
-			display.setTextColor(BLACK);
-			display.setCursor(0,54);
-			display.print(lastSetting);
-			display.setTextColor(WHITE);
-			display.setCursor(0,54);
-			display.print(setting);
-			lastSetting = setting;
+		void displaySetting(const String & setting);
+
+		uint8_t lastWifi;
+		void displayWifi(const uint8_t signalStrength, const uint8_t startX = 108, const uint8_t startY = 10){
+			display.drawPixel(startX, startY - 1, WHITE);
+			display.drawCircle(startX, startY, 4, WHITE);
+			display.drawCircle(startX, startY, 6, WHITE);
+			display.drawCircle(startX, startY, 8, WHITE);
+			display.drawCircle(startX, startY, 10, WHITE);
+			display.fillTriangle(startX, startY, startX + 10, startY - 10, startX + 10, startY, BLACK);
+			display.fillTriangle(startX, startY, startX - 10, startY - 10, startX - 10, startY, BLACK);
+			display.fillRect(startX - 10, startY, 21, 11, BLACK);
 			display.display();
 		}
 
