@@ -4,7 +4,7 @@
 
 #include "TEA5767.hpp"
 #include "Graphics.hpp"
-#include "Input.hpp"
+#include "Interface.hpp"
 #include "Time.hpp"
 
 WiFiUDP ntpUDP;
@@ -15,8 +15,13 @@ const char* password = "Snip238!";
 
 TEA5767 radio = TEA5767(Wire, 5000);
 Graphics display = Graphics(Wire, 128, 64);
-Input input = Input(36, 39);
+RotaryEncoder encoder = RotaryEncoder(36, 39, 32);
+Interface interface = Interface(encoder);
 Time timeKeeper = Time(timeClient);
+
+void buttonPressed(){
+	encoder.buttonPressed();
+}
 
 void connect(){
 	WiFi.begin(ssid, password);
@@ -26,25 +31,27 @@ void connect(){
 }
 
 void setup(){
+	attachInterrupt(encoder.getSwitchPin(), buttonPressed, FALLING);
+
 	connect();
 
 	Wire.begin();
 	Serial.begin(9600);
 	EEPROM.begin(2);
 
-	input.addListener(&radio);
-	input.addListener(&display);
+	interface.addListener(&radio);
+	interface.addListener(&display);
 	radio.addListener(&display);
 	timeKeeper.addListener(&display);
 
 	display.begin();
 	timeKeeper.begin();
 	radio.begin();
-	input.begin();
+	interface.begin();
 }
 
 void loop(){
 	timeKeeper();
-	input();
+	interface();
 	radio();
 }

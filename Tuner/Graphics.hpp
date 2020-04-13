@@ -5,34 +5,40 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include "Input.hpp"
+#include "Interface.hpp"
 #include "TEA5767.hpp"
 #include "Time.hpp"
 
-class Graphics : public InputListener, public RadioStatsListener, public TimeListener {
+class Graphics : public InterfaceListener, public RadioStatsListener, public TimeListener {
 	private:
 		Adafruit_SSD1306 display;
 
-		void displayFrequency(const float frequency);
 		float lastFrequency = 0.0;
+		void displayFrequency(const float frequency);
 
-		void displayStatistics(const bool stereo, const uint8_t signalStrength);
 		bool lastStereo = false;
 		uint8_t lastStrength = 0;
+		void displayStatistics(const bool stereo, const uint8_t signalStrength);
 
 		void displayStrength(const uint8_t & signalStrength, const uint8_t startX = 118, const uint8_t startY = 10);
 
 		String lastTime = "";
-		void displayTime(const String time){
+		void displayTime(const String time);
+
+		enum class states {FREE, PRESETS};
+		states state = states::FREE;
+
+		String lastSetting;
+		void displaySetting(const String & setting){
 			display.setTextSize(1);
 			display.setTextColor(BLACK);
-			display.setCursor(2, 2);
-			display.print(lastTime);
+			display.setCursor(0,54);
+			display.print(lastSetting);
 			display.setTextColor(WHITE);
-			display.setCursor(2, 2);
-			display.print(time);
-			lastTime = time;
-			display.display(); 
+			display.setCursor(0,54);
+			display.print(setting);
+			lastSetting = setting;
+			display.display();
 		}
 
 	public:
@@ -50,6 +56,11 @@ class Graphics : public InputListener, public RadioStatsListener, public TimeLis
 		virtual void newTime(const String time) override {
 			displayTime(time);
 		}
+
+		virtual void settingSelected(const String & setting) override {
+			displaySetting(setting);
+		}
+
 };
 
 #endif //__GUI_HPP

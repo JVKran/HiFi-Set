@@ -5,11 +5,22 @@ Graphics::Graphics(TwoWire & bus, const uint8_t width, const uint8_t height):
 {}
 
 void Graphics::begin(){
-	if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
+	if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
 		Serial.println("Check SSD1306 Wiring!");
 	}
 	display.clearDisplay();
-	display.display();
+}
+
+void Graphics::displayTime(const String time){
+	display.setTextSize(1);
+	display.setTextColor(BLACK);
+	display.setCursor(2, 2);
+	display.print(lastTime);
+	display.setTextColor(WHITE);
+	display.setCursor(2, 2);
+	display.print(time);
+	lastTime = time;
+	display.display(); 
 }
 
 void Graphics::displayFrequency(const float frequency){

@@ -5,7 +5,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "Input.hpp"
+#include "Interface.hpp"
 #include "Array.hpp"
 
 class RadioStatsListener {
@@ -31,7 +31,7 @@ class RadioStatsListener {
 ///		- Set/Get Software Programmable Ports
 ///		- More to be seen in tests
 /// 
-class TEA5767 : public InputListener {
+class TEA5767 : public InterfaceListener {
 	private:
 		unsigned long long int updatePeriod;
 		unsigned long long int lastUpdate;
@@ -126,7 +126,7 @@ class TEA5767 : public InputListener {
 				uint8_t currentStrength = signalStrength();
 				if(lastStereo != currentStereo || lastSignalStrength != currentStrength) {
 					for(uint8_t i = 0; i < amountOfListeners; i++){
-						listeners[i]->newStatistics(currentStereo, 255);
+						listeners[i]->newStatistics(!currentStereo, 255);
 					}
 					lastStereo = currentStereo;
 					lastSignalStrength = currentStrength;
