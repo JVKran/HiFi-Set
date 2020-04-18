@@ -9,51 +9,84 @@ void Interface::begin(){
 	if(frequency < 80){
 		frequency = 100.7;
 	}
+
 	Serial.println(frequency);
 	for(uint8_t i = 0; i < amountOfListeners; i++){
 		listeners[i]->frequencySelected(frequency);
 	}
-	if(EEPROM.read(2)){
-		state = states::FREE;
-	} else {
-		state = states::PRESETS;
+
+	switch(EEPROM.read(2)){
+		case 0: {
+			state = states::PRESETS;
+			for(uint8_t i = 0; i < amountOfListeners; i++){
+				listeners[i]->settingSelected("Presets");
+			}
+			break;
+		}
+		case 1: {
+			state = states::INTERNET;
+			for(uint8_t i = 0; i < amountOfListeners; i++){
+				listeners[i]->settingSelected("Internet");
+			}
+			break;
+		}
+		default: {
+			state = states::FREE;
+			for(uint8_t i = 0; i < amountOfListeners; i++){
+				listeners[i]->settingSelected("Free");
+			}
+			break;
+		}
 	}
 	encoder.setCount(frequency * 10 - 869);
-	if(state == states::FREE){
-		for(uint8_t i = 0; i < amountOfListeners; i++){
-			listeners[i]->settingSelected("Free");
-		}
-	} else {
-		for(uint8_t i = 0; i < amountOfListeners; i++){
-			listeners[i]->settingSelected("Presets");
-		}
-	}
 }
 
 void Interface::addListener(InterfaceListener * listenerToAdd){
 	listeners[amountOfListeners++] = listenerToAdd;
 }
 
-void Interface::operator()(){
+void Interface::handleSwitchPress(){
 	if(encoder.getSwitch()){
 		Serial.print("Pressed");
-		if(state == states::FREE){
-			state = states::PRESETS;
-			for(uint8_t i = 0; i < amountOfListeners; i++){
-				listeners[i]->settingSelected("Presets");
+		switch(state){
+			case states::FREE: {
+				state = states::PRESETS;
+				for(uint8_t i = 0; i < amountOfListeners; i++){
+					listeners[i]->settingSelected("Presets");
+				}
+				EEPROM.write(2, 0);
+				break;
 			}
-			EEPROM.write(2, false);
-		} else {
-			state = states::FREE;
-			float desiredFrequency = presets[encoder.getCount() % 8] + 0.1;
-			encoder.setCount(float(desiredFrequency - 87) * 10);
-			for(uint8_t i = 0; i < amountOfListeners; i++){
-				listeners[i]->settingSelected("Free");
+			case states::PRESETS: {
+				state = states::INTERNET;
+				float desiredFrequency = frequencyPresets[encoder.getCount() % 8] + 0.1;
+				encoder.setCount(float(desiredFrequency - 87) * 10);
+				for(uint8_t i = 0; i < amountOfListeners; i++){
+					listeners[i]->settingSelected("Internet");
+				}
+				EEPROM.write(2, 1);
+				break;
 			}
-			EEPROM.write(2, true);
+			case states::INTERNET: {
+				state = states::FREE;
+				float desiredFrequency = frequencyPresets[encoder.getCount() % 8] + 0.1;
+				encoder.setCount(float(desiredFrequency - 87) * 10);
+				for(uint8_t i = 0; i < amountOfListeners; i++){
+					listeners[i]->settingSelected("Free");
+				}
+				EEPROM.write(2, 2);
+				break;
+			}
+			default: {
+				break;
+			}
 		}
 		EEPROM.commit();
 	}
+}
+
+void Interface::operator()(){
+	handleSwitchPress();
 	if(lastPosition != encoder.getCount()){
 		lastPosition = encoder.getCount();
 		switch(state){
@@ -64,10 +97,17 @@ void Interface::operator()(){
 				}
 				break;
 			}
-			default: {
+			case states::PRESETS: {
 				for(uint8_t i = 0; i < amountOfListeners; i++){
-					listeners[i]->frequencySelected(presets[encoder.getCount() % 8]);
+					listeners[i]->frequencySelected(frequencyPresets[encoder.getCount() % 8]);
 					listeners[i]->settingSelected(stations[encoder.getCount() % 8]);
+				}
+				break;
+			}
+			case states::INTERNET: {
+				for(uint8_t i = 0; i < amountOfListeners; i++){
+					listeners[i]->hostSelected(hostnames[encoder.getCount() % 2]);
+					listeners[i]->pathSelected(pathnames[encoder.getCount() % 2]);
 				}
 				break;
 			}
@@ -80,8 +120,8 @@ void Interface::operator()(){
 			int frequency;
 			if(state == states::FREE){
 				frequency = float(87 + (float(lastPosition) / 10)) * 10;
-			} else {
-				frequency = presets[encoder.getCount() % 8];
+			} else if (state == states::PRESETS){
+				frequency = frequencyPresets[encoder.getCount() % 8];
 			}
 			EEPROM.write(0, frequency / 10);	// 
 			EEPROM.write(1, frequency - (frequency / 10) * 10);

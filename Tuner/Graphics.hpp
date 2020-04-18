@@ -2,11 +2,11 @@
 #define __GUI_HPP
 
 #include <Arduino.h>
+#include "Radio.hpp"
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "Interface.hpp"
-#include "TEA5767.hpp"
 #include "Time.hpp"
 
 class Graphics : public InterfaceListener, public RadioStatsListener, public TimeListener {
