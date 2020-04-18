@@ -13,6 +13,11 @@ void Interface::begin(){
 	for(uint8_t i = 0; i < amountOfListeners; i++){
 		listeners[i]->frequencySelected(frequency);
 	}
+	if(EEPROM.read(2)){
+		state = states::FREE;
+	} else {
+		state = states::PRESETS;
+	}
 	encoder.setCount(frequency * 10 - 869);
 	if(state == states::FREE){
 		for(uint8_t i = 0; i < amountOfListeners; i++){
@@ -37,6 +42,7 @@ void Interface::operator()(){
 			for(uint8_t i = 0; i < amountOfListeners; i++){
 				listeners[i]->settingSelected("Presets");
 			}
+			EEPROM.write(2, false);
 		} else {
 			state = states::FREE;
 			float desiredFrequency = presets[encoder.getCount() % 8] + 0.1;
@@ -44,7 +50,9 @@ void Interface::operator()(){
 			for(uint8_t i = 0; i < amountOfListeners; i++){
 				listeners[i]->settingSelected("Free");
 			}
+			EEPROM.write(2, true);
 		}
+		EEPROM.commit();
 	}
 	if(lastPosition != encoder.getCount()){
 		lastPosition = encoder.getCount();
